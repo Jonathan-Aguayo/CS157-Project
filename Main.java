@@ -218,7 +218,7 @@ public class Main {
         String birthyear;
 
         sopln("");
-        sopln("Please enter the birthyear: ");
+        sopln("Please enter the birth year: ");
         boolean done = false;
         while (!done) {
             sop(">> ");
@@ -289,7 +289,7 @@ public class Main {
          * ENTER QUERY EXECUTION HERE 
          */
         ResultSet rs;
-        String query = "select name from names where primaryprofession = '" + profession +"'";
+        String query = "select name from names where primaryprofession = '" + profession + "'";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
@@ -392,7 +392,8 @@ public class Main {
          * ENTER QUERY EXECUTION HERE 
          */
         ResultSet rs;
-        String query = "select title from title_basics where genres = '" + genre +"'";
+        String query = "select title from title_akas join title_basics " +
+                "on title_akas.titleID = title_basics.titleID where title_basics.genres = '" + genre + "'";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
@@ -426,12 +427,12 @@ public class Main {
          * ENTER QUERY EXECUTION HERE 
          */
         ResultSet rs;
-        String query = "select name from names where ID = '" + title +"'";
+        String query = "select name from names where primaryprofession = 'director' and knownForTitles ='" + title +"'";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
             String name = rs.getString(2);
-            sopln(name)
+            sopln(name);
         }
         sopln("");
     }
@@ -460,13 +461,14 @@ public class Main {
          * ENTER QUERY EXECUTION HERE 
          */
         ResultSet rs;
-        String query = "select seasonNumber from title_episodes where (select titleID from title_akas) = '" + title + "'";
+        String query = "select seasonNumber from title_episodes where titleID = '" + title + "'";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
-            String title2 = rs.getString(1);
-            sopln(title2);
+            String sn = rs.getString(3);
+            sopln(sn);
         }
+
 
     }
 
@@ -475,7 +477,7 @@ public class Main {
      */
     public static void option9(Statement statement) throws SQLException {
         Scanner sc = new Scanner(System.in);
-        String id;
+        String title;
 
         sopln("");
         sopln("Please enter the alphanumeric unique identifier of the name: ");
@@ -483,7 +485,7 @@ public class Main {
         while (!done) {
             sop(">> ");
             if (sc.hasNextLine()) {
-                id = sc.nextLine();
+                title = sc.nextLine();
                 done = true;
             } else {
                 sc.next();
@@ -494,11 +496,11 @@ public class Main {
          * ENTER QUERY EXECUTION HERE 
          */
         ResultSet rs;
-        String query = "select primaryprofession from names where id = '" + id "'";
+        String query = "select category from title_principals where titleID = '" + title + "'";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
-            String title = rs.getString(5);
+            String category = rs.getString(4);
             sopln(title);
         }
         sopln("");
@@ -528,22 +530,23 @@ public class Main {
          * ENTER QUERY EXECUTION HERE 
          */
         ResultSet rs;
-        String query = "select title from title_akas where (select averageRating from title_ratings >= " + rating +")";
+        String query = "select title from title_akas join title_ratings on title_akas.titleID = title_ratings.titleID where title_ratings.averageRating >= " + rating;
         rs = statement.executeQuery(query);
         while(rs.next())
         {
-            String title = rs.getString(3);
+            String title = rs.getString(2);
             sopln(title);
         }
         sopln("");
     }
 
     /**
-     * Display top 5 rated movies
+     * Display top 5 rated movies (correlated subquery)
      */
     public static void option11(Statement statement) throws SQLException{
+
         ResultSet rs;
-        String query = "select name from names where (select averageRating from title_ratings orderby averageRating desc limit 5)";
+        String query = "select title from title_akas a where a.titleID = (select b.titleID from title_ratings b orderby averageRating desc limit 5";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
@@ -554,28 +557,52 @@ public class Main {
     }
 
     /**
-     *
+     * Display titleIDs with more than 10 associated titles (group by having)
      */
     public static void option12(Statement statement) throws SQLException {
-
+        ResultSet rs;
+        String query = "select titleID count(title) from title_akas group by titleID having count(title) > 10";
+        rs = statement.executeQuery(query);
+        while(rs.next())
+        {
+            String title = rs.getString(3);
+            sopln(title);
+        }
+        sopln("");
     }
 
     /**
-     *
+     * Display the first actors in history (aggregation function min)
      */
     public static void option13(Statement statement) throws SQLException {
-
+        ResultSet rs;
+        String query = "select name from names where primaryprofession = 'actor' and min(birthyear)";
+        rs = statement.executeQuery(query);
+        while(rs.next())
+        {
+            String title = rs.getString(3);
+            sopln(title);
+        }
+        sopln("");
     }
 
     /**
-     *
+     * set operation
      */
     public static void option14(Statement statement) throws SQLException{
-
+        ResultSet rs;
+        String query = "select";
+        rs = statement.executeQuery(query);
+        while(rs.next())
+        {
+            String title = rs.getString(3);
+            sopln(title);
+        }
+        sopln("");
     }
 
     /**
-     *
+     * Show titles with over 50 episodes
      */
     public static void option15(Statement statement) throws SQLException{
 
