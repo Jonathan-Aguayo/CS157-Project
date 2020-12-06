@@ -1,5 +1,5 @@
-import java.util.Scanner;
 import java.sql.*;
+import java.util.Scanner;
 
 public class Main {
     // JDBC driver name and database URL
@@ -11,23 +11,19 @@ public class Main {
     private static Connection conn = null;
     private static Statement statement = null;
 
+
     public static void main(String[] args) throws SQLException
     {
+        conn= null;
+        statement = null;
+
         try
         {
-            conn = DriverManager.getConnection(DB_URL+"?serverTimezone=UTC", USER, PASS);
             conn = DriverManager.getConnection(DB_URL+"project?serverTimezone=UTC", USER, PASS);
             statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                     ResultSet.CONCUR_UPDATABLE);
-            ResultSet rs = statement.executeQuery(""); // The result goes to ResultSet
-            System.out.println("Displaying record ...");
-            while (rs.next())
-            {
-                String id = rs.getNString("titleID");
-                System.out.println("ID: " + id);
-            }
-
         }
+
         catch(SQLException se){se.printStackTrace(); }
         catch(Exception e){ e.printStackTrace(); }
         finally
@@ -38,54 +34,11 @@ public class Main {
             try{ if(conn!=null) conn.close(); }
             catch(SQLException se){ se.printStackTrace(); }
         }
-        System.out.println("Goodbye!");
+
         signIn();
         menu();
     }//end main
-
-    private static void createDatabase() throws SQLException
-    {
-
-        // Open a connection
-        System.out.println("Connecting to database...");
-
-
-        // Create a database named CS
-        System.out.println("Creating database...");
-        statement = conn.createStatement();
-
-        String queryDrop = "DROP DATABASE IF EXISTS cs";
-        //Statement stmtDrop = conn.createStatement();
-        statement.execute(queryDrop);
-        String sql = "CREATE DATABASE project";
-        statement.executeUpdate(sql);
-        System.out.println("Database created successfully...");
-    }
-    private static void createTable() throws SQLException
-    {
-        // Open a connection and select the database named CS
-
-        System.out.println("Connecting to database...");
-        conn = DriverManager.getConnection(DB_URL+"project1?serverTimezone=UTC", USER, PASS);
-        statement = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-                ResultSet.CONCUR_UPDATABLE);
-
-        String queryDrop = "DROP TABLE IF EXISTS STUDENTS";
-        statement.execute(queryDrop);
-    }
-
-    private static void manipulateData() throws SQLException
-    { ResultSet rs = statement.executeQuery(""); // The result goes to ResultSet
-        System.out.println("Displaying record ...");
-        while (rs.next())
-        {
-            String id = rs.getNString("ID");
-            String name = rs.getString("name");
-            System.out.println("ID:" + id + " Name:" + name );
-        }
-        // Inserting a row to the ResultSet
-    }
-
+    
 
     public static int userType;
 
@@ -109,7 +62,7 @@ public class Main {
      * Displays welcome message.
      * Asks for user type selection.
      */
-    public static void signIn() {
+    public static void signIn(){
         Scanner sc = new Scanner(System.in);
 
         sopln("-=+ IMDB Streaming Service +=-");
@@ -164,8 +117,8 @@ public class Main {
             sopln("8. Display season number given an alphanumeric identifier of the episode.");
             sopln("9. Display job category given an alphanumeric unique identifier of the name.");
             sopln("10. Display titles that are greater than or equal to a given rating.");
-            sopln("11. ");
-            sopln("12. ");
+            sopln("11. Display top 5 rated movies (correlated subquery)");
+            sopln("12. Display titleIDs with more than 10 associated titles (group by having)");
             sopln("13. ");
             sopln("14. ");
             sopln("15. ");
@@ -215,7 +168,7 @@ public class Main {
      */
     public static void option1(Statement statement) throws SQLException{
         Scanner sc = new Scanner(System.in);
-        String birthyear;
+        String birthyear = "";
 
         sopln("");
         sopln("Please enter the birth year: ");
@@ -231,8 +184,10 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
+        StringBuffer sb;
+        sb = new StringBuffer();
         ResultSet rs;
         String query = "select name from names where birthyear > " + birthyear;
         rs = statement.executeQuery(query);
@@ -251,7 +206,7 @@ public class Main {
         sopln("");
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select name from names where deathyear is null";
@@ -270,7 +225,7 @@ public class Main {
      */
     public static void option3(Statement statement) throws SQLException{
         Scanner sc = new Scanner(System.in);
-        String profession;
+        String profession = "";
 
         sopln("");
         sopln("Please enter the profession: ");
@@ -286,7 +241,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select name from names where primaryprofession = '" + profession + "'";
@@ -304,7 +259,7 @@ public class Main {
      */
     public static void option4(Statement statement) throws SQLException{
         Scanner sc = new Scanner(System.in);
-        String region;
+        String region = "";
 
         sopln("");
         sopln("Please enter the region: ");
@@ -320,7 +275,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select title from title_akas where region = '" + region +"'";
@@ -338,7 +293,7 @@ public class Main {
      */
     public static void option5(Statement statement) throws SQLException{
         Scanner sc = new Scanner(System.in);
-        String format;
+        String format = "";
 
         sopln("");
         sopln("Please enter the format: ");
@@ -354,7 +309,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select title from title_akas where kind = '" + format +"'";
@@ -373,7 +328,7 @@ public class Main {
      */
     public static void option6(Statement statement) throws SQLException {
         Scanner sc = new Scanner(System.in);
-        String genre;
+        String genre = "";
 
         sopln("");
         sopln("Please enter the genre: ");
@@ -389,7 +344,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select title from title_akas join title_basics " +
@@ -408,7 +363,7 @@ public class Main {
      */
     public static void option7(Statement statement) throws SQLException {
         Scanner sc = new Scanner(System.in);
-        String title;
+        String title = "";
 
         sopln("");
         sopln("Please enter the alphanumeric unique identifier of the title: ");
@@ -424,7 +379,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select name from names where primaryprofession = 'director' and knownForTitles ='" + title +"'";
@@ -442,7 +397,7 @@ public class Main {
      */
     public static void option8(Statement statement) throws SQLException {
         Scanner sc = new Scanner(System.in);
-        String title;
+        String episode = "";
 
         sopln("");
         sopln("Please enter the alphanumeric identifier of the episode: ");
@@ -450,7 +405,7 @@ public class Main {
         while (!done) {
             sop(">> ");
             if (sc.hasNextLine()) {
-                title = sc.nextLine();
+                episode = sc.nextLine();
                 done = true;
             } else {
                 sc.next();
@@ -458,10 +413,10 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
-        String query = "select seasonNumber from title_episodes where titleID = '" + title + "'";
+        String query = "select seasonNumber from title_episodes where titleID = '" + episode + "'";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
@@ -477,7 +432,7 @@ public class Main {
      */
     public static void option9(Statement statement) throws SQLException {
         Scanner sc = new Scanner(System.in);
-        String title;
+        String title = "";
 
         sopln("");
         sopln("Please enter the alphanumeric unique identifier of the name: ");
@@ -493,7 +448,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select category from title_principals where titleID = '" + title + "'";
@@ -511,7 +466,7 @@ public class Main {
      */
     public static void option10(Statement statement) throws SQLException{
         Scanner sc = new Scanner(System.in);
-        String rating;
+        String rating = "";
 
         sopln("");
         sopln("Please enter the rating: ");
@@ -527,7 +482,7 @@ public class Main {
         }
 
         /**
-         * ENTER QUERY EXECUTION HERE 
+         * ENTER QUERY EXECUTION HERE
          */
         ResultSet rs;
         String query = "select title from title_akas join title_ratings on title_akas.titleID = title_ratings.titleID where title_ratings.averageRating >= " + rating;
@@ -546,7 +501,7 @@ public class Main {
     public static void option11(Statement statement) throws SQLException{
 
         ResultSet rs;
-        String query = "select title from title_akas a where a.titleID = (select b.titleID from title_ratings b orderby averageRating desc limit 5";
+        String query = "select title from title_akas as a where a.titleID = (select b.titleID from title_ratings as b) orderby averageRating desc limit 5";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
@@ -561,7 +516,7 @@ public class Main {
      */
     public static void option12(Statement statement) throws SQLException {
         ResultSet rs;
-        String query = "select titleID count(title) from title_akas group by titleID having count(title) > 10";
+        String query = "select titleID, count(title) from title_akas group by titleID having count(title) > 10";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
@@ -576,7 +531,7 @@ public class Main {
      */
     public static void option13(Statement statement) throws SQLException {
         ResultSet rs;
-        String query = "select name from names where primaryprofession = 'actor' and min(birthyear)";
+        String query = "select name from names where primaryprofession = 'actor' and (select min(birthyear) from names b) ";
         rs = statement.executeQuery(query);
         while(rs.next())
         {
